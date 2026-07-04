@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInAnonymously,
   signInWithEmailAndPassword,
@@ -609,7 +610,8 @@ const uiText = {
     login: "Login",
     email: "Email",
     password: "Password",
-    continueDemo: "Continue as demo guest"
+    continueDemo: "Continue as demo guest",
+    signUp: "Sign Up"
   },
   hi: {
     nav: {
@@ -679,7 +681,8 @@ const uiText = {
     login: "\u0932\u0949\u0917\u093f\u0928",
     email: "\u0908\u092e\u0947\u0932",
     password: "\u092a\u093e\u0938\u0935\u0930\u094d\u0921",
-    continueDemo: "\u0921\u0947\u092e\u094b guest \u0915\u0947 \u0930\u0942\u092a \u092e\u0947\u0902 \u091c\u093e\u0930\u0940 \u0930\u0916\u0947\u0902"
+    continueDemo: "\u0921\u0947\u092e\u094b guest \u0915\u0947 \u0930\u0942\u092a \u092e\u0947\u0902 \u091c\u093e\u0930\u0940 \u0930\u0916\u0947\u0902",
+    signUp: "\u0938\u093e\u0907\u0928 \u0905\u092a"
   }
 };
 function uniqueValues(items, key) {
@@ -968,6 +971,19 @@ export default function App() {
     }
   }
 
+  async function handleEmailSignup() {
+    setAuthError("");
+
+    try {
+      if (!auth) {
+        setUser(createLocalDemoUser());
+        return;
+      }
+      await createUserWithEmailAndPassword(auth, authForm.email, authForm.password);
+    } catch (error) {
+      setAuthError(error.message);
+    }
+  }
   async function handleGuestLogin() {
     setAuthError("");
 
@@ -1336,11 +1352,6 @@ export default function App() {
                 ))}
               </div>
             </article>
-            <article className="soft-panel rounded-3xl p-6">
-              <h3 className="text-2xl font-semibold text-white">{textLabels.deploymentReady}</h3>
-              <p className="mt-4 leading-7 text-slate-300">{textLabels.deploymentText}</p>
-              <button className="mt-6 rounded-2xl bg-white px-5 py-3 font-semibold text-slate-950" onClick={() => handleNavClick("planner")} type="button">{textLabels.openPlanner}</button>
-            </article>
           </div>
         </section>
       ) : null}
@@ -1588,6 +1599,7 @@ export default function App() {
                 authError={authError}
                 authForm={authForm}
                 handleEmailLogin={handleEmailLogin}
+                handleEmailSignup={handleEmailSignup}
                 handleGuestLogin={handleGuestLogin}
                 setAuthForm={setAuthForm}
               />
@@ -1649,7 +1661,7 @@ function FilterBar({ filters, options, setFilters }) {
   );
 }
 
-function AuthPanel({ textLabels, authError, authForm, handleEmailLogin, handleGuestLogin, setAuthForm }) {
+function AuthPanel({ textLabels, authError, authForm, handleEmailLogin, handleEmailSignup, handleGuestLogin, setAuthForm }) {
   return (
     <div className="soft-panel rounded-3xl p-6">
       <h3 className="text-2xl font-semibold">{textLabels.login}</h3>
@@ -1668,9 +1680,14 @@ function AuthPanel({ textLabels, authError, authForm, handleEmailLogin, handleGu
           type="password"
           value={authForm.password}
         />
-        <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 font-semibold text-slate-950" type="submit">
-          <LogIn size={18} /> {textLabels.login}
-        </button>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 font-semibold text-slate-950" type="submit">
+            <LogIn size={18} /> {textLabels.login}
+          </button>
+          <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 px-5 py-3 font-semibold hover:bg-white/10" onClick={handleEmailSignup} type="button">
+            <UserRound size={18} /> {textLabels.signUp}
+          </button>
+        </div>
       </form>
       <button className="mt-3 w-full rounded-2xl border border-white/20 px-5 py-3 font-semibold hover:bg-white/10" onClick={handleGuestLogin} type="button">
         {textLabels.continueDemo}
